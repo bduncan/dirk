@@ -1,0 +1,5 @@
+      [paste.app_factory]
+      main = dirk:main
+      [console_scripts]
+      initialize_dirk_db = dirk.scripts.initializedb:main
+      
