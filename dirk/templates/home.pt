@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" xmlns:tal="http://xml.zope.org/namespaces/tal">
+<head>
+  <title>Dirk</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+  <meta name="keywords" content="python web application" />
+  <meta name="description" content="pyramid web application" />
+  <link rel="shortcut icon" href="${request.static_url('dirk:static/favicon.ico')}" />
+  <link rel="stylesheet" href="${request.static_url('dirk:static/pylons.css')}" type="text/css" media="screen" charset="utf-8" />
+  <link rel="stylesheet" href="http://static.pylonsproject.org/fonts/nobile/stylesheet.css" media="screen" />
+  <link rel="stylesheet" href="http://static.pylonsproject.org/fonts/neuton/stylesheet.css" media="screen" />
+  <!--[if lte IE 6]>
+  <link rel="stylesheet" href="${request.static_url('dirk:static/ie6.css')}" type="text/css" media="screen" charset="utf-8" />
+  <![endif]-->
+</head>
+<body>
+  <div id="wrap">
+    <div id="middle">
+      <div class="middle align-center">
+        <p class="app-welcome">
+          Welcome to <span class="app-name">${title}</span>
+        </p>
+      </div>
+    </div>
+    <div id="bottom">
+      <div class="bottom">
+        <div id="left" class="align-right">
+        <h2>Projects</h2>
+        <ul>
+          <li tal:repeat="item projects" tal:content="item.name">
+        </ul>
+        </div>
+        <div id="right" class="align-left">
+        <h2>People</h2>
+        <ul>
+          <li tal:repeat="item people" tal:content="item.name">
+        </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -5,17 +5,19 @@ from sqlalchemy.exc import DBAPIError
 
 from .models import (
     DBSession,
-    MyModel,
+    Project,
+    Person,
     )
 
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
+@view_config(route_name='home', renderer='templates/home.pt')
 def my_view(request):
     try:
-        one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
+        projects = DBSession.query(Project).all()
+        people = DBSession.query(Person).all()
     except DBAPIError:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
-    return {'one': one, 'project': 'dirk'}
+    return {'projects': projects, 'people': people, 'title': 'dirk'}
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
