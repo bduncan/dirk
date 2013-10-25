@@ -23,8 +23,9 @@ Base = declarative_base()
 class Project(Base):
     __tablename__ = 'projects'
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
+    name = Column(Text, nullable=False)
     description = Column(Text)
+    owner = Column(Integer, ForeignKey("people.id"))
 
 
 Index('project_name_index', Project.name, unique=True, mysql_length=255)
@@ -32,7 +33,7 @@ Index('project_name_index', Project.name, unique=True, mysql_length=255)
 class Person(Base):
     __tablename__ = 'people'
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
+    name = Column(Text, nullable=False)
 
 Index('person_name_index', Person.name, unique=True, mysql_length=255)
 
