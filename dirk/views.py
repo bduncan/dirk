@@ -1,4 +1,5 @@
 from pyramid.response import Response
+from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 
 from sqlalchemy.exc import DBAPIError
@@ -19,7 +20,11 @@ def my_view(request):
         people = DBSession.query(Person).all()
     except DBAPIError:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
-    return {'projects': projects, 'people': people, 'title': 'dirk'}
+    return {'projects': projects,
+            'people': people,
+            'title': 'dirk',
+            'add_person_url': request.route_url('add_person'),
+            }
 
 conn_err_msg = """\
 Pyramid is having a problem using your SQL database.  The problem
@@ -93,3 +98,10 @@ try it again.
 </svg>
 """
         return Response(conn_err_msg, content_type='image/svg+xml', status_int=500)
+
+@view_config(route_name='add_person')
+def add_person_view(request):
+    if 'form.submitted' in request.params and 'name' in request.params:
+        p = Person(request.params['name'])
+        DBSession.add(p)
+    return HTTPFound(location=request.route_url('home'))
