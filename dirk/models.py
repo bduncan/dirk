@@ -37,7 +37,8 @@ class Person(Base):
 
 Index('person_name_index', Person.name, unique=True, mysql_length=255)
 
-dependencies = Table("depends", Base.metadata,
-    Column("id", Integer),
-    Column("parent", Integer, ForeignKey("projects.id")),
-    Column("child", Integer, ForeignKey("projects.id")))
+class Dependency(Base):
+    __tablename__ = 'depends'
+    id = Column(Integer, primary_key=True)
+    parent = Column(Integer, ForeignKey("projects.id"))
+    child = Column(Integer, ForeignKey("projects.id"))
