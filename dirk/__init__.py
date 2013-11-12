@@ -23,5 +23,6 @@ def main(global_config, **settings):
     config.add_route('add_project', '/project/add/{name}')
     config.add_route('edit_person', '/person/{name}/edit')
     config.add_route('edit_project', '/project/{name}/edit')
+    config.add_route('view_graph', '/graph.svg')
     config.scan()
     return config.make_wsgi_app()
