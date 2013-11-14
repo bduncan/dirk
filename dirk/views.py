@@ -16,8 +16,8 @@ from .models import (
 @view_config(route_name='home', renderer='templates/home.pt')
 def my_view(request):
     try:
-        projects = DBSession.query(Project).all()
-        people = DBSession.query(Person).all()
+        projects = DBSession.query(Project).order_by(Project.name).all()
+        people = DBSession.query(Person).order_by(Person.name).all()
     except DBAPIError:
         return Response(conn_err_msg, content_type='text/plain', status_int=500)
     return {'projects': projects,
