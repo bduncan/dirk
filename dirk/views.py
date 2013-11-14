@@ -110,9 +110,10 @@ def add_person_view(request):
 @view_config(route_name='view_person', renderer='templates/view_person.pt')
 def view_person_view(request):
     person = DBSession.query(Person).filter(Person.name==request.matchdict['name']).one()
-    projects = DBSession.query(Project).all()
+    projects = DBSession.query(Project).filter(Project.owner==person.id).order_by(Project.name).all()
     return {'person': person,
             'projects': projects,
+            'home_url': request.route_url('home'),
             'edit_person_url': request.route_url('edit_person', name=request.matchdict['name']),
             'delete_person_url': request.route_url('delete_person', name=request.matchdict['name']),
            }
@@ -138,16 +139,15 @@ def edit_project_view(request):
         project.description = request.params['description']
         project.owner = request.params['owner'] or None
         return HTTPFound(location=request.route_url('view_project', name=request.matchdict['name']))
-    people = DBSession.query(Person).all()
+    people = DBSession.query(Person).order_by(Person.name).all()
     return {'project': project, 'people': people}
 
 @view_config(route_name='view_project', renderer='templates/view_project.pt')
 def view_project_view(request):
     project = DBSession.query(Project, Person).filter(Project.name==request.matchdict['name']).outerjoin(Person, Person.id==Project.owner).one()
-#    people = DBSession.query(Person).all()
     return {'project': project.Project,
             'owner': project.Person,
-#            'people': people,
+            'home_url': request.route_url('home'),
             'edit_project_url': request.route_url('edit_project', name=request.matchdict['name']),
             'depends_project_url': request.route_url('project_depends', name=request.matchdict['name']),
             'delete_project_url': request.route_url('delete_project', name=request.matchdict['name']),
@@ -172,7 +172,7 @@ def depends_project_view(request):
             DBSession.add(d)
         if not requires:
             # Nothing requires this project
-            DBSession.query(Dependency).filter(Dependency.parent==project.id).delete()
+            DBSession.query(Dependency).filter(Dependency.child==project.id).delete()
         else:
             # Delete all the projects not listed in "requires"
             DBSession.query(Dependency).filter(Dependency.parent==project.id).filter(Dependency.child.in_(DBSession.query(Project.id).filter(~Project.name.in_(requires)))).delete(synchronize_session='fetch')
@@ -186,14 +186,14 @@ def depends_project_view(request):
             DBSession.add(d)
         if not enables:
             # Nothing enables this project
-            DBSession.query(Dependency).filter(Dependency.child==project.id).delete()
+            DBSession.query(Dependency).filter(Dependency.parent==project.id).delete()
         else:
             # Delete all the projects not listed in "enables"
             DBSession.query(Dependency).filter(Dependency.child==project.id).filter(Dependency.parent.in_(DBSession.query(Project.id).filter(~Project.name.in_(enables)))).delete(synchronize_session='fetch')
         return HTTPFound(location=request.route_url('view_project', name=request.matchdict['name']))
-    requires = DBSession.query(Project).join(Dependency, Dependency.parent==Project.id).filter(Dependency.child==project.id).all()
-    enables = DBSession.query(Project).join(Dependency, Dependency.child==Project.id).filter(Dependency.parent==project.id).all()
-    projects = DBSession.query(Project).all()
+    requires = DBSession.query(Project).join(Dependency, Dependency.parent==Project.id).filter(Dependency.child==project.id).order_by(Project.name).all()
+    enables = DBSession.query(Project).join(Dependency, Dependency.child==Project.id).filter(Dependency.parent==project.id).order_by(Project.name).all()
+    projects = DBSession.query(Project).order_by(Project.name).all()
     return {'project': project,
             'requires': requires,
             'enables': enables,

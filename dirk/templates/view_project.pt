@@ -39,6 +39,9 @@
           <form method="post" action="${delete_project_url}">
               <input type="submit" value="Delete!" style="background-color: red;" />
           </form>
+          <form method="get" action="${home_url}">
+              <input type="submit" value="Home" />
+          </form>
       </div>
     </div>
   </div>
