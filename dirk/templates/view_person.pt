@@ -18,43 +18,15 @@
     <div id="middle">
       <div class="middle align-center">
         <p class="app-welcome">
-          Welcome to <span class="app-name">${title}</span>
+          <span class="app-name">${person.name}</span>
         </p>
       </div>
     </div>
     <div id="bottom">
-      <div class="align-center">
-        <img src="graph.svg" style="padding-top: 2em" />
-      </div>
-      <div class="bottom">
-        <div id="left" class="align-right">
-        <h2 class="align-center">Projects</h2>
-        <ul class="align-left">
-          <li tal:repeat="item projects">
-            <a href="/project/${item.name}" tal:content="item.name" />
-          </li>
-          <li>
-            <form method="get" action="${add_project_url}">
-              <input type="text" name="name" />
-              <input type="submit" name="form.submitted" value="Add" />
-            </form>
-          </li>
-        </ul>
-        </div>
-        <div id="right" class="align-left">
-        <h2 class="align-center">People</h2>
-        <ul>
-          <li tal:repeat="item people">
-            <a href="/person/${item.name}" tal:content="item.name" />
-          </li>
-          <li>
-            <form method="get" action="${add_person_url}">
-              <input type="text" name="name" />
-              <input type="submit" name="form.submitted" value="Add" />
-            </form>
-          </li>
-        </ul>
-        </div>
+      <div class="bottom align-center">
+          <form method="post" action="${delete_person_url}">
+              <input type="submit" value="Delete!" style="background-color: red;" />
+          </form>
       </div>
     </div>
   </div>

@@ -18,43 +18,21 @@
     <div id="middle">
       <div class="middle align-center">
         <p class="app-welcome">
-          Welcome to <span class="app-name">${title}</span>
+          <span class="app-name">${project.name}</span>
         </p>
       </div>
     </div>
     <div id="bottom">
-      <div class="align-center">
-        <img src="graph.svg" style="padding-top: 2em" />
-      </div>
-      <div class="bottom">
-        <div id="left" class="align-right">
-        <h2 class="align-center">Projects</h2>
-        <ul class="align-left">
-          <li tal:repeat="item projects">
-            <a href="/project/${item.name}" tal:content="item.name" />
-          </li>
-          <li>
-            <form method="get" action="${add_project_url}">
-              <input type="text" name="name" />
-              <input type="submit" name="form.submitted" value="Add" />
-            </form>
-          </li>
-        </ul>
-        </div>
-        <div id="right" class="align-left">
-        <h2 class="align-center">People</h2>
-        <ul>
-          <li tal:repeat="item people">
-            <a href="/person/${item.name}" tal:content="item.name" />
-          </li>
-          <li>
-            <form method="get" action="${add_person_url}">
-              <input type="text" name="name" />
-              <input type="submit" name="form.submitted" value="Add" />
-            </form>
-          </li>
-        </ul>
-        </div>
+      <div class="bottom align-center">
+        <form method="post">
+          <input type="hidden" name="id" value="${project.id}" />
+          Description: <textarea name="description" tal:content="project.description"></textarea><br/>
+          Owner: <select name="owner">
+            <option value="" />
+            <option tal:repeat="item people" value="${item.id}" tal:content="item.name" tal:attributes="selected 'selected' if item.id is project.owner else None" />
+          </select><br/>
+          <input type="submit" name="form.submitted" value="Edit" />
+        </form>
       </div>
     </div>
   </div>

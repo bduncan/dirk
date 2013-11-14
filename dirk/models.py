@@ -27,7 +27,7 @@ class Project(Base):
     description = Column(Text)
     owner = Column(Integer, ForeignKey("people.id"))
 
-    def __init__(self, name, description):
+    def __init__(self, name, description=None):
         self.name = name
         self.description = description
 
