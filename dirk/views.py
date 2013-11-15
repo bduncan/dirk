@@ -166,7 +166,6 @@ def depends_project_view(request):
     if 'form.submitted' in request.params and request.method == 'POST':
         # Insert all the projects listed in "requires"
         requires = request.params.getall('requires')
-        print "requires",requires
         for require in requires:
             d = Dependency(parent=DBSession.query(Project).filter(Project.name==require).one().id, child=project.id)
             DBSession.add(d)
@@ -175,13 +174,11 @@ def depends_project_view(request):
             DBSession.query(Dependency).filter(Dependency.child==project.id).delete()
         else:
             # Delete all the projects not listed in "requires"
-            DBSession.query(Dependency).filter(Dependency.parent==project.id).filter(Dependency.child.in_(DBSession.query(Project.id).filter(~Project.name.in_(requires)))).delete(synchronize_session='fetch')
+            DBSession.query(Dependency).filter(Dependency.child==project.id).filter(~Dependency.parent.in_(DBSession.query(Project.id).filter(Project.name.in_(requires)))).delete(synchronize_session='fetch')
 
         enables = request.params.getall('enables')
-        print "enables",enables
         # Insert all the projects listed in "enables"
         for enable in enables:
-            print "enabling",enable
             d = Dependency(parent=project.id, child=DBSession.query(Project).filter(Project.name==enable).one().id)
             DBSession.add(d)
         if not enables:
@@ -189,7 +186,7 @@ def depends_project_view(request):
             DBSession.query(Dependency).filter(Dependency.parent==project.id).delete()
         else:
             # Delete all the projects not listed in "enables"
-            DBSession.query(Dependency).filter(Dependency.child==project.id).filter(Dependency.parent.in_(DBSession.query(Project.id).filter(~Project.name.in_(enables)))).delete(synchronize_session='fetch')
+            DBSession.query(Dependency).filter(Dependency.parent==project.id).filter(~Dependency.child.in_(DBSession.query(Project.id).filter(Project.name.in_(enables)))).delete(synchronize_session='fetch')
         return HTTPFound(location=request.route_url('view_project', name=request.matchdict['name']))
     requires = DBSession.query(Project).join(Dependency, Dependency.parent==Project.id).filter(Dependency.child==project.id).order_by(Project.name).all()
     enables = DBSession.query(Project).join(Dependency, Dependency.child==Project.id).filter(Dependency.parent==project.id).order_by(Project.name).all()
