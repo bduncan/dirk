@@ -9,6 +9,7 @@ from sqlalchemy import (
 
 from sqlalchemy.ext.declarative import declarative_base
 
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import (
     scoped_session,
     sessionmaker,
@@ -33,9 +34,12 @@ class Project(Base):
         self.name = name
         self.description = description
 
-    @property
+    @hybrid_property
     def label(self):
-        return "%s (%s)" % (self.name, self.owner.name)
+        if self.owner:
+            return "%s\\n(%s)" % (self.name, self.owner.name)
+        else:
+            return self.name
 
 Index('project_name_index', Project.name, unique=True, mysql_length=255)
 

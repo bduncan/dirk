@@ -48,9 +48,9 @@ def graph_view(request):
     try:
         import pygraphviz
         graph = pygraphviz.AGraph(directed=True)
-        graph.add_nodes_from(x.name for x in DBSession.query(Project.name).all())
+        graph.add_nodes_from(x.label for x in DBSession.query(Project).all())
         child_alias = aliased(Project)
-        graph.add_edges_from(DBSession.query(Project.name, child_alias.name).join(Dependency, Project.id==Dependency.parent_id).join(child_alias, child_alias.id==Dependency.child_id).all())
+        graph.add_edges_from((x.label, y.label) for x, y in DBSession.query(Project, child_alias).join(Dependency, Project.id==Dependency.parent_id).join(child_alias, child_alias.id==Dependency.child_id).all())
         return Response(graph.draw(format="svg", prog="dot"), content_type='image/svg+xml')
     except DBAPIError:
         conn_err_msg = """\
