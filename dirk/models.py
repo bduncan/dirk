@@ -12,6 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
     scoped_session,
     sessionmaker,
+    relationship,
     )
 
 from zope.sqlalchemy import ZopeTransactionExtension
@@ -25,11 +26,16 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
     description = Column(Text)
-    owner = Column(Integer, ForeignKey("people.id"))
+    owner_id = Column(Integer, ForeignKey("people.id"))
+    owner = relationship("Person", backref="projects")
 
     def __init__(self, name, description=None):
         self.name = name
         self.description = description
+
+    @property
+    def label(self):
+        return "%s (%s)" % (self.name, self.owner.name)
 
 Index('project_name_index', Project.name, unique=True, mysql_length=255)
 
@@ -46,8 +52,10 @@ Index('person_name_index', Person.name, unique=True, mysql_length=255)
 class Dependency(Base):
     __tablename__ = 'depends'
     id = Column(Integer, primary_key=True)
-    parent = Column(Integer, ForeignKey("projects.id"))
-    child = Column(Integer, ForeignKey("projects.id"))
+    parent_id = Column(Integer, ForeignKey("projects.id"))
+    parent = relationship("Project", backref="requires", foreign_keys=[parent_id])
+    child_id = Column(Integer, ForeignKey("projects.id"))
+    child = relationship("Project", backref="enables", foreign_keys=[child_id])
 
     def __init__(self, parent, child):
         self.parent = parent

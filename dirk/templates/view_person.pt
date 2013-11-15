@@ -26,7 +26,7 @@
       <div class="bottom align-center">
         ${person.name} is the owner of:
         <ul>
-          <li tal:repeat="item projects" tal:content="item.name" />
+          <li tal:repeat="item person.projects" tal:content="item.name" />
         </ul>
           <form method="post" action="${delete_person_url}">
               <input type="submit" value="Delete!" style="background-color: red;" />

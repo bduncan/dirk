@@ -46,14 +46,11 @@ try it again.
 @view_config(route_name='view_graph')
 def graph_view(request):
     try:
-        #projects = DBSession.query(Project).all()
-        #people = DBSession.query(Person).all()
-        #depends = DBSession.query(depends).all()
         import pygraphviz
         graph = pygraphviz.AGraph(directed=True)
         graph.add_nodes_from(x.name for x in DBSession.query(Project.name).all())
         child_alias = aliased(Project)
-        graph.add_edges_from(DBSession.query(Project.name, child_alias.name).join(Dependency, Project.id==Dependency.parent).join(child_alias, child_alias.id==Dependency.child).all())
+        graph.add_edges_from(DBSession.query(Project.name, child_alias.name).join(Dependency, Project.id==Dependency.parent_id).join(child_alias, child_alias.id==Dependency.child_id).all())
         return Response(graph.draw(format="svg", prog="dot"), content_type='image/svg+xml')
     except DBAPIError:
         conn_err_msg = """\
@@ -110,9 +107,7 @@ def add_person_view(request):
 @view_config(route_name='view_person', renderer='templates/view_person.pt')
 def view_person_view(request):
     person = DBSession.query(Person).filter(Person.name==request.matchdict['name']).one()
-    projects = DBSession.query(Project).filter(Project.owner==person.id).order_by(Project.name).all()
     return {'person': person,
-            'projects': projects,
             'home_url': request.route_url('home'),
             'edit_person_url': request.route_url('edit_person', name=request.matchdict['name']),
             'delete_person_url': request.route_url('delete_person', name=request.matchdict['name']),
@@ -137,16 +132,15 @@ def edit_project_view(request):
     project = DBSession.query(Project).filter(Project.name==request.matchdict['name']).one()
     if 'form.submitted' in request.params:
         project.description = request.params['description']
-        project.owner = request.params['owner'] or None
+        project.owner_id = request.params['owner'] or None
         return HTTPFound(location=request.route_url('view_project', name=request.matchdict['name']))
     people = DBSession.query(Person).order_by(Person.name).all()
     return {'project': project, 'people': people}
 
 @view_config(route_name='view_project', renderer='templates/view_project.pt')
 def view_project_view(request):
-    project = DBSession.query(Project, Person).filter(Project.name==request.matchdict['name']).outerjoin(Person, Person.id==Project.owner).one()
-    return {'project': project.Project,
-            'owner': project.Person,
+    project = DBSession.query(Project).filter(Project.name==request.matchdict['name']).one()
+    return {'project': project,
             'home_url': request.route_url('home'),
             'edit_project_url': request.route_url('edit_project', name=request.matchdict['name']),
             'depends_project_url': request.route_url('project_depends', name=request.matchdict['name']),
@@ -167,29 +161,29 @@ def depends_project_view(request):
         # Insert all the projects listed in "requires"
         requires = request.params.getall('requires')
         for require in requires:
-            d = Dependency(parent=DBSession.query(Project).filter(Project.name==require).one().id, child=project.id)
+            d = Dependency(parent=DBSession.query(Project).filter(Project.name==require).one(), child=project)
             DBSession.add(d)
         if not requires:
             # Nothing requires this project
-            DBSession.query(Dependency).filter(Dependency.child==project.id).delete()
+            DBSession.query(Dependency).filter(Dependency.child==project).delete()
         else:
             # Delete all the projects not listed in "requires"
-            DBSession.query(Dependency).filter(Dependency.child==project.id).filter(~Dependency.parent.in_(DBSession.query(Project.id).filter(Project.name.in_(requires)))).delete(synchronize_session='fetch')
+            DBSession.query(Dependency).filter(Dependency.child==project).filter(~Dependency.parent_id.in_(DBSession.query(Project.id).filter(Project.name.in_(requires)))).delete(synchronize_session='fetch')
 
         enables = request.params.getall('enables')
         # Insert all the projects listed in "enables"
         for enable in enables:
-            d = Dependency(parent=project.id, child=DBSession.query(Project).filter(Project.name==enable).one().id)
+            d = Dependency(parent=project, child=DBSession.query(Project).filter(Project.name==enable).one())
             DBSession.add(d)
         if not enables:
             # Nothing enables this project
-            DBSession.query(Dependency).filter(Dependency.parent==project.id).delete()
+            DBSession.query(Dependency).filter(Dependency.parent==project).delete()
         else:
             # Delete all the projects not listed in "enables"
-            DBSession.query(Dependency).filter(Dependency.parent==project.id).filter(~Dependency.child.in_(DBSession.query(Project.id).filter(Project.name.in_(enables)))).delete(synchronize_session='fetch')
+            DBSession.query(Dependency).filter(Dependency.parent==project).filter(~Dependency.child_id.in_(DBSession.query(Project.id).filter(Project.name.in_(enables)))).delete(synchronize_session='fetch')
         return HTTPFound(location=request.route_url('view_project', name=request.matchdict['name']))
-    requires = DBSession.query(Project).join(Dependency, Dependency.parent==Project.id).filter(Dependency.child==project.id).order_by(Project.name).all()
-    enables = DBSession.query(Project).join(Dependency, Dependency.child==Project.id).filter(Dependency.parent==project.id).order_by(Project.name).all()
+    requires = DBSession.query(Project).join(Dependency, Dependency.parent_id==Project.id).filter(Dependency.child==project).order_by(Project.name).all()
+    enables = DBSession.query(Project).join(Dependency, Dependency.child_id==Project.id).filter(Dependency.parent==project).order_by(Project.name).all()
     projects = DBSession.query(Project).order_by(Project.name).all()
     return {'project': project,
             'requires': requires,
