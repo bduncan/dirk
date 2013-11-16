@@ -116,8 +116,9 @@ def view_person_view(request):
 @view_config(route_name='delete_person')
 def delete_person_view(request):
     if request.method == 'POST':
-        person = DBSession.query(Person).filter(Person.name==request.matchdict['name']).one()
-        DBSession.delete(person)
+        if DBSession.query(Project).join(Person).filter(Person.name==request.matchdict['name']).count() == 0:
+            person = DBSession.query(Person).filter(Person.name==request.matchdict['name']).one()
+            DBSession.delete(person)
     return HTTPFound(location=request.route_url('home'))
 
 @view_config(route_name='add_project')

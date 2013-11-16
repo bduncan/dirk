@@ -27,8 +27,8 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
     description = Column(Text)
-    owner_id = Column(Integer, ForeignKey("people.id"))
-    owner = relationship("Person", backref="projects")
+    owner_id = Column(Integer, ForeignKey("people.id", ondelete='RESTRICT'))
+    owner = relationship("Person", backref="projects", single_parent=True)
 
     def __init__(self, name, description=None):
         self.name = name
