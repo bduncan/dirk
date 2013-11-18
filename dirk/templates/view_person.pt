@@ -24,7 +24,7 @@
     </div>
     <div id="bottom">
       <div class="bottom align-center">
-        ${person.name} is the owner of:
+        ${person.name} is a contributor to:
         <ul>
           <li tal:repeat="item person.projects" tal:content="item.name" />
         </ul>

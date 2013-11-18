@@ -30,7 +30,9 @@
                 tal:repeat="line project.description.splitlines()">
             ${line}<br />
           </span>
-          Owner: <span tal:omit-tag="" tal:condition="project.owner">${project.owner.name}</span>
+          Contributors: <ul>
+            <li tal:repeat="person project.contributors">${person.name}</li>
+          </ul>
           <form method="get" action="${edit_project_url}">
             <input type="submit" value="Edit project" />
           </form>

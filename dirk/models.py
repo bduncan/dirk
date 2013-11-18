@@ -9,7 +9,6 @@ from sqlalchemy import (
 
 from sqlalchemy.ext.declarative import declarative_base
 
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import (
     scoped_session,
     sessionmaker,
@@ -22,20 +21,18 @@ DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
 
+contributors = Table("contributors", Base.metadata,
+    Column('id', Integer, primary_key=True),
+    Column('project_id', Integer, ForeignKey("project.id")),
+    Column('person_id', Integer, ForeignKey("person.id")),
+    )
+
 class Project(Base):
     __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
     description = Column(Text)
-    owner_id = Column(Integer, ForeignKey("person.id", ondelete='RESTRICT'))
-    owner = relationship("Person", backref="projects", single_parent=True)
-
-    @hybrid_property
-    def label(self):
-        if self.owner:
-            return "%s\\n(%s)" % (self.name, self.owner.name)
-        else:
-            return self.name
+    contributors = relationship("Person", secondary=contributors, backref="projects")
 
 Index('project_name_index', Project.name, unique=True, mysql_length=255)
 

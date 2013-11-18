@@ -27,10 +27,10 @@
         <form method="post">
           <input type="hidden" name="id" value="${project.id}" />
           Description: <textarea name="description" tal:content="project.description"></textarea><br/>
-          Owner: <select name="owner">
-            <option value="" tal:attributes="selected 'selected' if not project.owner else None" />
-            <option tal:repeat="item people" value="${item.id}" tal:content="item.name" tal:attributes="selected 'selected' if item is project.owner else None" />
-          </select><br/>
+          Contributors:<br/>
+          <span tal:repeat="person people" tal:omit-tag="">
+            <input type="checkbox" name="contributors" tal:attributes="value person.id; checked 'checked' if person in project.contributors else None" />${person.name}<br/>
+          </span>
           <input type="submit" name="form.submitted" value="Edit" />
         </form>
       </div>

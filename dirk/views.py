@@ -56,8 +56,8 @@ def graph_view(request):
             join_criterion = or_(Project.name == request.params['project'], child_alias.name == request.params['project'])
         else:
             all_criterion = join_criterion = True
-        graph.add_nodes_from(x.label for x in DBSession.query(Project).filter(all_criterion).order_by(Project.id).all())
-        graph.add_edges_from((x.label, y.label) for x, y in DBSession.query(Project, child_alias).filter(join_criterion).join(Dependency, Project.id==Dependency.parent_id).join(child_alias, child_alias.id==Dependency.child_id).order_by(Dependency.id).all())
+        graph.add_nodes_from(x.name for x in DBSession.query(Project).filter(all_criterion).order_by(Project.id).all())
+        graph.add_edges_from((x.name, y.name) for x, y in DBSession.query(Project, child_alias).filter(join_criterion).join(Dependency, Project.id==Dependency.parent_id).join(child_alias, child_alias.id==Dependency.child_id).order_by(Dependency.id).all())
         return Response(graph.draw(format="svg", prog="dot"), content_type='image/svg+xml')
     except DBAPIError:
         conn_err_msg = """\
@@ -123,7 +123,7 @@ def view_person_view(request):
 @view_config(route_name='delete_person')
 def delete_person_view(request):
     if request.method == 'POST':
-        if DBSession.query(Project).join(Person).filter(Person.name==request.matchdict['name']).count() == 0:
+        if len(DBSession.query(Person).filter(Person.name==request.matchdict['name']).one().projects) == 0:
             person = DBSession.query(Person).filter(Person.name==request.matchdict['name']).one()
             DBSession.delete(person)
     return HTTPFound(location=request.route_url('home'))
@@ -140,7 +140,7 @@ def edit_project_view(request):
     project = DBSession.query(Project).filter(Project.name==request.matchdict['name']).one()
     if 'form.submitted' in request.params:
         project.description = request.params['description']
-        project.owner_id = request.params['owner'] or None
+        project.contributors = DBSession.query(Person).filter(Person.id.in_(int(id) for id in request.params.getall('contributors'))).all()
         return HTTPFound(location=request.route_url('view_project', name=request.matchdict['name']))
     people = DBSession.query(Person).order_by(Person.name).all()
     return {'project': project, 'people': people}
