@@ -24,7 +24,7 @@
     </div>
     <div id="bottom">
       <div class="align-center">
-        <img src="graph.svg" style="padding-top: 2em" />
+        <img src="${graph_url}" style="padding-top: 2em" />
       </div>
       <div class="bottom">
         <div id="left" class="align-right">

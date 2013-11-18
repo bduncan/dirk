@@ -24,6 +24,7 @@
     </div>
     <div id="bottom">
       <div class="bottom align-center">
+          <img src="${graph_url}?project=${project.name}" /><br/>
           <span tal:omit-tag="" 
                 tal:condition="project.description"
                 tal:repeat="line project.description.splitlines()">
