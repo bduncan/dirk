@@ -23,11 +23,11 @@ Base = declarative_base()
 
 
 class Project(Base):
-    __tablename__ = 'projects'
+    __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
     description = Column(Text)
-    owner_id = Column(Integer, ForeignKey("people.id", ondelete='RESTRICT'))
+    owner_id = Column(Integer, ForeignKey("person.id", ondelete='RESTRICT'))
     owner = relationship("Person", backref="projects", single_parent=True)
 
     @hybrid_property
@@ -40,7 +40,7 @@ class Project(Base):
 Index('project_name_index', Project.name, unique=True, mysql_length=255)
 
 class Person(Base):
-    __tablename__ = 'people'
+    __tablename__ = 'person'
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
 
@@ -49,7 +49,7 @@ Index('person_name_index', Person.name, unique=True, mysql_length=255)
 class Dependency(Base):
     __tablename__ = 'depends'
     id = Column(Integer, primary_key=True)
-    parent_id = Column(Integer, ForeignKey("projects.id"))
+    parent_id = Column(Integer, ForeignKey("project.id"))
     parent = relationship("Project", backref="requires", foreign_keys=[parent_id])
-    child_id = Column(Integer, ForeignKey("projects.id"))
+    child_id = Column(Integer, ForeignKey("project.id"))
     child = relationship("Project", backref="enables", foreign_keys=[child_id])
