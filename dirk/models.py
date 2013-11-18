@@ -30,10 +30,6 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey("people.id", ondelete='RESTRICT'))
     owner = relationship("Person", backref="projects", single_parent=True)
 
-    def __init__(self, name, description=None):
-        self.name = name
-        self.description = description
-
     @hybrid_property
     def label(self):
         if self.owner:
@@ -48,9 +44,6 @@ class Person(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
 
-    def __init__(self, name):
-        self.name = name
-
 Index('person_name_index', Person.name, unique=True, mysql_length=255)
 
 class Dependency(Base):
@@ -60,7 +53,3 @@ class Dependency(Base):
     parent = relationship("Project", backref="requires", foreign_keys=[parent_id])
     child_id = Column(Integer, ForeignKey("projects.id"))
     child = relationship("Project", backref="enables", foreign_keys=[child_id])
-
-    def __init__(self, parent, child):
-        self.parent = parent
-        self.child = child

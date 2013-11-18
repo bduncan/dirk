@@ -107,7 +107,7 @@ try it again.
 @view_config(route_name='add_person')
 def add_person_view(request):
     if 'form.submitted' in request.params and 'name' in request.params:
-        p = Person(request.params['name'])
+        p = Person(name=request.params['name'])
         DBSession.add(p)
     return HTTPFound(location=request.route_url('home'))
 
@@ -131,7 +131,7 @@ def delete_person_view(request):
 @view_config(route_name='add_project')
 def add_project_view(request):
     if 'form.submitted' in request.params and 'name' in request.params:
-        p = Project(request.params['name'])
+        p = Project(name=request.params['name'])
         DBSession.add(p)
     return HTTPFound(location=request.route_url('home'))
 
